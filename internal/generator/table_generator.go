@@ -55,7 +55,7 @@ func GenerateColumnsForStruct(columnsToGen []string) string {
 	return strings.Join(columnsToGen, " entities.Column\n") + " entities.Column\n"
 }
 
-// Just comment!
+// Just comment!dawdwadwa
 func GenerateColumnsForGetColumns(columnsToGen []string) string {
 	var res []string
 	for i := 0; i < len(columnsToGen); i++ {
