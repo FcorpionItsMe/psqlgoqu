@@ -34,7 +34,7 @@ func main() {
 	//} else {
 	//	fmt.Printf("%#+v", findedPath)
 	//}
-	fmt.Print(generator.GenerateTableCode("brands"))
+	fmt.Print(generator.GenerateTableCode("brands", "Id", "Name", "Description"))
 	cmd.Execute()
 }
 

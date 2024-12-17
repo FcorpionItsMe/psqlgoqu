@@ -2,7 +2,7 @@ package entities
 
 type Column struct {
 	Name     string
-	Position string
+	Position int
 }
 
 func (c Column) String() string {

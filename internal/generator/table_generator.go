@@ -1,13 +1,17 @@
 package generator
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
 
 var mainTableTemplate = `
 var %%TableVarName%% = %%TableName%%Table{
-
+     Name: "%%TableName%%",
+     Columns: %%TableName%%TableColumns{
+               %%ColumnsInitialization%%
+     },
 }
 
 type %%TableName%%Table struct {
@@ -42,5 +46,26 @@ func GenerateTableCode(tableName string, columns ...string) string {
 	withVarName := strings.ReplaceAll(withTableName, "%%TableVarName%%", tableNameWithFirstLetterUpper)
 	columnsCount := len(columns)
 	withColumnsCount := strings.ReplaceAll(withVarName, "%%ColumnsCount%%", strconv.Itoa(columnsCount))
-	return withColumnsCount
+	withStructColumns := strings.ReplaceAll(withColumnsCount, "%%Columns%%", GenerateColumnsForStruct(columns))
+	withGetColumnsFuncColumns := strings.ReplaceAll(withStructColumns, "%%ColumnsForGetColumn%%", GenerateColumnsForGetColumns(columns))
+	withInitialization := strings.ReplaceAll(withGetColumnsFuncColumns, "%%ColumnsInitialization%%", GenerateColumnsInitialization(columns))
+	return withInitialization
+}
+func GenerateColumnsForStruct(columnsToGen []string) string {
+	return strings.Join(columnsToGen, " entities.Column\n") + " entities.Column\n"
+}
+func GenerateColumnsForGetColumns(columnsToGen []string) string {
+	var res []string
+	for i := 0; i < len(columnsToGen); i++ {
+		res = append(res, "t."+columnsToGen[i])
+	}
+	return strings.Join(res, ", ")
+}
+func GenerateColumnsInitialization(clmns []string) string {
+	var res []string
+	for i := 0; i < len(clmns); i++ {
+		column := clmns[i] + ": " + fmt.Sprintf("entities.Column{Name: pq.QuoteIdentifier(\"%s\"), Position: %d}", clmns[i], i)
+		res = append(res, column)
+	}
+	return strings.Join(res, ",\n") + ",\n"
 }
