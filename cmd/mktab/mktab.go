@@ -1,10 +1,15 @@
 package mktab
 
 import (
+	"fmt"
+	"github.com/FcorpionItsMe/psqlgoqu/internal/generator"
 	"github.com/FcorpionItsMe/psqlgoqu/internal/utils"
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"log"
 	"os"
+	"strings"
 )
 
 var Path string
@@ -28,16 +33,25 @@ var mktabCommand = &cobra.Command{
 			log.Fatal("Path is empty!")
 			return
 		}
-		actualPath := projectPath + "\\" + Path
-		stat, err := os.Stat(actualPath)
+		actualPath := strings.ReplaceAll(projectPath+"\\"+Path, "/", "\\")
+		actualDirStat, err := os.Stat(actualPath)
 		if err != nil {
-			log.Fatal(err)
+			slog.Warn("" + err.Error())
 			return
 		}
-		if !stat.IsDir() {
+		if !actualDirStat.IsDir() {
 			log.Fatal("Path is not a directory!")
 		}
-		
+		tableCode := generator.GenerateTableCode(strings.ToLower(actualDirStat.Name()), Name, args...)
+		pathForFile := actualPath + "/" + fmt.Sprintf("%s_table.go", Name)
+		createdFile, err := os.Create(strings.ReplaceAll(pathForFile, "/", "\\"))
+		if err != nil {
+			log.Println(err)
+		}
+		_, err = createdFile.WriteString(tableCode)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 

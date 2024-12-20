@@ -7,6 +7,8 @@ import (
 )
 
 var mainTableTemplate = `
+package %%PackageName%%
+
 var %%TableVarName%% = %%TableName%%Table{
      Name: "%%TableName%%",
      Columns: %%TableName%%TableColumns{
@@ -25,8 +27,8 @@ type %%TableName%%TableColumns struct {
     func (t %%TableName%%Table) GetName() string {
         return t.Name
     }
-	func (t %%TableName%%Table) GetColumns() []Column {
-         return []Column{%%ColumnsForGetColumn%%}
+	func (t %%TableName%%Table) GetColumns() []entities.Column {
+         return []entities.Column{%%ColumnsForGetColumn%%}
     }
 	func (t %%TableName%%Table) GetColumnsCount() int {
       return %%ColumnsCount%%
@@ -36,8 +38,9 @@ type %%TableName%%TableColumns struct {
     }
 `
 
-func GenerateTableCode(tableName string, columns ...string) string {
-	withTableName := strings.ReplaceAll(mainTableTemplate, "%%TableName%%", tableName)
+func GenerateTableCode(packageName string, tableName string, columns ...string) string {
+	withPackageName := strings.ReplaceAll(mainTableTemplate, "%%PackageName%%", packageName)
+	withTableName := strings.ReplaceAll(withPackageName, "%%TableName%%", tableName)
 	var tableNameWithFirstLetterUpper string
 	tableNameWithFirstLetterUpper += strings.ToUpper(string(tableName[0]))
 	for i := 1; i < len(tableName); i++ {
@@ -59,7 +62,7 @@ func GenerateColumnsForStruct(columnsToGen []string) string {
 func GenerateColumnsForGetColumns(columnsToGen []string) string {
 	var res []string
 	for i := 0; i < len(columnsToGen); i++ {
-		res = append(res, "t."+columnsToGen[i])
+		res = append(res, "t.Columns."+columnsToGen[i])
 	}
 	return strings.Join(res, ", ")
 }
